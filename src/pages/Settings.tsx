@@ -16,6 +16,9 @@ import { useAuth } from '../context/AuthContext';
 
 const Settings: React.FC = () => {
   const { user, updateUser } = useAuth();
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [settings, setSettings] = useState({
     notifications: {
@@ -43,6 +46,34 @@ const Settings: React.FC = () => {
   const handleSave = () => {
     // Simulate saving settings
     alert('Configurações salvas com sucesso!');
+  };
+
+  const handlePasswordChange = () => {
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      alert('Preencha todos os campos de senha.');
+      return;
+    }
+    
+    if (currentPassword !== '123456') {
+      alert('Senha atual incorreta.');
+      return;
+    }
+    
+    if (newPassword !== confirmPassword) {
+      alert('Nova senha e confirmação não coincidem.');
+      return;
+    }
+    
+    if (newPassword.length < 6) {
+      alert('Nova senha deve ter pelo menos 6 caracteres.');
+      return;
+    }
+    
+    // In a real app, this would update the password in the backend
+    alert('Senha alterada com sucesso!');
+    setCurrentPassword('');
+    setNewPassword('');
+    setConfirmPassword('');
   };
 
   const exportData = () => {
@@ -154,6 +185,44 @@ const Settings: React.FC = () => {
                 className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-red-500 focus:border-red-500 dark:bg-gray-700 dark:text-white"
               />
             </div>
+            
+            {user?.role === 'admin' && (
+              <div className="space-y-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <h4 className="text-sm font-medium text-gray-900 dark:text-white">Alterar Senha</h4>
+                
+                <input
+                  type="password"
+                  placeholder="Senha atual"
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-red-500 focus:border-red-500 dark:bg-gray-700 dark:text-white"
+                />
+                
+                <input
+                  type="password"
+                  placeholder="Nova senha"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-red-500 focus:border-red-500 dark:bg-gray-700 dark:text-white"
+                />
+                
+                <input
+                  type="password"
+                  placeholder="Confirmar nova senha"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-red-500 focus:border-red-500 dark:bg-gray-700 dark:text-white"
+                />
+                
+                <button
+                  onClick={handlePasswordChange}
+                  className="w-full bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 transition-colors"
+                >
+                  Alterar Senha
+                </button>
+              </div>
+            )}
+            
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Perfil

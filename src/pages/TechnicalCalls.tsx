@@ -11,7 +11,8 @@ import {
   Camera,
   FileText,
   Play,
-  Edit
+  Edit,
+  Trash2
 } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import { useAuth } from '../context/AuthContext';
@@ -290,6 +291,31 @@ const TechnicalCalls: React.FC = () => {
                       <Edit className="h-3 w-3 mr-1" />
                       Atualizar
                     </button>
+                  )}
+                  
+                  {user?.role === 'admin' && (
+                    <div className="flex space-x-1">
+                      <button
+                        onClick={() => {
+                          setSelectedCall(call);
+                          setUpdateData({
+                            status: call.status,
+                            resolution: call.resolution || '',
+                            photos: call.photos || []
+                          });
+                          setShowUpdateModal(true);
+                        }}
+                        className="inline-flex items-center px-2 py-1 border border-gray-300 rounded-md text-xs font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
+                      >
+                        <Edit className="h-3 w-3" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteCall(call.id)}
+                        className="inline-flex items-center px-2 py-1 border border-red-300 rounded-md text-xs font-medium text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </button>
+                    </div>
                   )}
                 </div>
               </div>

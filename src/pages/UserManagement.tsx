@@ -109,6 +109,8 @@ const UserManagement: React.FC = () => {
         active: true
       });
       setShowAddModal(false);
+      
+      alert(`Usuário ${user.name} criado com sucesso!\nEmail: ${user.email}\nSenha: ${user.password}`);
     }
   };
 

@@ -7,6 +7,7 @@ import TechnicalCalls from './pages/TechnicalCalls';
 import Reports from './pages/Reports';
 import EquipmentLifecycle from './pages/EquipmentLifecycle';
 import UserManagement from './pages/UserManagement';
+import UnitManagement from './pages/UnitManagement';
 import Settings from './pages/Settings';
 import Login from './components/Login';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -38,6 +39,8 @@ function AppContent() {
         return <EquipmentLifecycle />;
       case 'users':
         return <UserManagement />;
+      case 'units':
+        return <UnitManagement />;
       case 'settings':
         return <Settings />;
       default:

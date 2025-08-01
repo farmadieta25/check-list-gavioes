@@ -18,6 +18,7 @@ const Reports: React.FC = () => {
   
   const [reportType, setReportType] = useState('equipment');
   const [selectedUnit, setSelectedUnit] = useState('');
+  const [selectedEquipments, setSelectedEquipments] = useState<string[]>([]);
   const [dateRange, setDateRange] = useState({
     start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     end: new Date().toISOString().split('T')[0]
@@ -115,22 +116,154 @@ const Reports: React.FC = () => {
   const reportData = generateReportData();
 
   const exportToPDF = () => {
-    // Simulate PDF export
-    alert('Funcionalidade de exportação para PDF será implementada.');
+    const selectedData = selectedEquipments.length > 0 
+      ? reportData.data.filter((_, index) => selectedEquipments.includes(index.toString()))
+      : reportData.data;
+    
+    if (selectedData.length === 0) {
+      alert('Selecione pelo menos um item para exportar.');
+      return;
+    }
+    
+    // Create PDF content
+    const pdfContent = `
+      ${reportData.title}
+      Período: ${new Date(dateRange.start).toLocaleDateString('pt-BR')} até ${new Date(dateRange.end).toLocaleDateString('pt-BR')}
+      
+      ${selectedData.map((item, index) => 
+        `${index + 1}. ${Object.entries(item).map(([key, value]) => `${key}: ${value}`).join(' | ')}`
+      ).join('\n')}
+    `;
+    
+    // Create and download PDF (simulated)
+    const blob = new Blob([pdfContent], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${reportData.title.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   };
 
   const exportToExcel = () => {
-    // Simulate Excel export
-    alert('Funcionalidade de exportação para Excel será implementada.');
+    const selectedData = selectedEquipments.length > 0 
+      ? reportData.data.filter((_, index) => selectedEquipments.includes(index.toString()))
+      : reportData.data;
+    
+    if (selectedData.length === 0) {
+      alert('Selecione pelo menos um item para exportar.');
+      return;
+    }
+    
+    // Create CSV content
+    const headers = selectedData.length > 0 ? Object.keys(selectedData[0]) : [];
+    const csvContent = [
+      headers.join(','),
+      ...selectedData.map(row => 
+        headers.map(header => `"${row[header as keyof typeof row]}"`).join(',')
+      )
+    ].join('\n');
+    
+    // Create and download CSV
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${reportData.title.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   };
 
   const sendByEmail = () => {
-    // Simulate email sending
-    alert('Funcionalidade de envio por email será implementada.');
+    const selectedData = selectedEquipments.length > 0 
+      ? reportData.data.filter((_, index) => selectedEquipments.includes(index.toString()))
+      : reportData.data;
+    
+    if (selectedData.length === 0) {
+      alert('Selecione pelo menos um item para enviar.');
+      return;
+    }
+    
+    const emailBody = `
+${reportData.title}
+Período: ${new Date(dateRange.start).toLocaleDateString('pt-BR')} até ${new Date(dateRange.end).toLocaleDateString('pt-BR')}
+
+${selectedData.map((item, index) => 
+  `${index + 1}. ${Object.entries(item).map(([key, value]) => `${key}: ${value}`).join(' | ')}`
+).join('\n')}
+    `;
+    
+    const mailtoLink = `mailto:?subject=${encodeURIComponent(reportData.title)}&body=${encodeURIComponent(emailBody)}`;
+    window.location.href = mailtoLink;
   };
 
   const print = () => {
-    window.print();
+    const selectedData = selectedEquipments.length > 0 
+      ? reportData.data.filter((_, index) => selectedEquipments.includes(index.toString()))
+      : reportData.data;
+    
+    if (selectedData.length === 0) {
+      alert('Selecione pelo menos um item para imprimir.');
+      return;
+    }
+    
+    const printContent = `
+      <html>
+        <head>
+          <title>${reportData.title}</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 20px; }
+            h1 { color: #D40000; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+            th { background-color: #f2f2f2; }
+          </style>
+        </head>
+        <body>
+          <h1>${reportData.title}</h1>
+          <p>Período: ${new Date(dateRange.start).toLocaleDateString('pt-BR')} até ${new Date(dateRange.end).toLocaleDateString('pt-BR')}</p>
+          <table>
+            <thead>
+              <tr>
+                ${Object.keys(selectedData[0] || {}).map(key => `<th>${key}</th>`).join('')}
+              </tr>
+            </thead>
+            <tbody>
+              ${selectedData.map(row => 
+                `<tr>${Object.values(row).map(value => `<td>${value}</td>`).join('')}</tr>`
+              ).join('')}
+            </tbody>
+          </table>
+        </body>
+      </html>
+    `;
+    
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(printContent);
+      printWindow.document.close();
+      printWindow.print();
+    }
+  };
+
+  const toggleEquipmentSelection = (index: string) => {
+    setSelectedEquipments(prev => 
+      prev.includes(index) 
+        ? prev.filter(i => i !== index)
+        : [...prev, index]
+    );
+  };
+
+  const selectAllEquipments = () => {
+    if (selectedEquipments.length === reportData.data.length) {
+      setSelectedEquipments([]);
+    } else {
+      setSelectedEquipments(reportData.data.map((_, index) => index.toString()));
+    }
   };
 
   // Statistics
@@ -293,9 +426,28 @@ const Reports: React.FC = () => {
 
         <div className="overflow-x-auto">
           {reportData.data.length > 0 ? (
+            <>
+              <div className="p-4 bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
+                <div className="flex items-center justify-between">
+                  <label className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={selectedEquipments.length === reportData.data.length && reportData.data.length > 0}
+                      onChange={selectAllEquipments}
+                      className="rounded border-gray-300 text-red-600 focus:ring-red-500"
+                    />
+                    <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                      Selecionar todos ({selectedEquipments.length} de {reportData.data.length} selecionados)
+                    </span>
+                  </label>
+                </div>
+              </div>
             <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
               <thead className="bg-gray-50 dark:bg-gray-700">
                 <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    Selecionar
+                  </th>
                   {Object.keys(reportData.data[0]).map((key) => (
                     <th
                       key={key}
@@ -309,6 +461,14 @@ const Reports: React.FC = () => {
               <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                 {reportData.data.map((row, index) => (
                   <tr key={index} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <input
+                        type="checkbox"
+                        checked={selectedEquipments.includes(index.toString())}
+                        onChange={() => toggleEquipmentSelection(index.toString())}
+                        className="rounded border-gray-300 text-red-600 focus:ring-red-500"
+                      />
+                    </td>
                     {Object.entries(row).map(([key, value], cellIndex) => (
                       <td key={cellIndex} className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                         {key === 'status' ? (
@@ -331,6 +491,7 @@ const Reports: React.FC = () => {
                 ))}
               </tbody>
             </table>
+            </>
           ) : (
             <div className="text-center py-12">
               <FileText className="mx-auto h-12 w-12 text-gray-400" />

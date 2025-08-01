@@ -60,6 +60,9 @@ interface DataContextType {
   equipments: Equipment[];
   technicalCalls: TechnicalCall[];
   checklists: Checklist[];
+  addUnit: (unit: Omit<Unit, 'id'>) => void;
+  updateUnit: (id: string, unit: Partial<Unit>) => void;
+  deleteUnit: (id: string) => void;
   addEquipment: (equipment: Omit<Equipment, 'id'>) => void;
   updateEquipment: (id: string, equipment: Partial<Equipment>) => void;
   deleteEquipment: (id: string) => void;
@@ -81,7 +84,7 @@ export const useData = () => {
 };
 
 export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [units] = useState<Unit[]>([
+  const [units, setUnits] = useState<Unit[]>([
     { id: 'Unit-001', name: 'Academia Gaviões - Centro', address: 'Rua das Flores, 123', technician: 'João Silva', equipmentCount: 25 },
     { id: 'Unit-002', name: 'Academia Gaviões - Norte', address: 'Av. Principal, 456', technician: 'Maria Santos', equipmentCount: 30 },
     { id: 'Unit-003', name: 'Academia Gaviões - Sul', address: 'Rua da Paz, 789', technician: 'Pedro Costa', equipmentCount: 22 },
@@ -208,6 +211,26 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setChecklists(prev => [...prev, newChecklist]);
   };
 
+  const addUnit = (unit: Omit<Unit, 'id'>) => {
+    const newUnit = {
+      ...unit,
+      id: `Unit-${Date.now()}`
+    };
+    setUnits(prev => [...prev, newUnit]);
+  };
+
+  const updateUnit = (id: string, unit: Partial<Unit>) => {
+    setUnits(prev => prev.map(u => u.id === id ? { ...u, ...unit } : u));
+  };
+
+  const deleteUnit = (id: string) => {
+    setUnits(prev => prev.filter(u => u.id !== id));
+    // Also remove equipments from this unit
+    setEquipments(prev => prev.filter(eq => eq.unitId !== id));
+    // Also remove technical calls from this unit
+    setTechnicalCalls(prev => prev.filter(call => call.unitId !== id));
+  };
+
   const getEquipmentsByUnit = (unitId: string) => {
     return equipments.filter(eq => eq.unitId === unitId);
   };
@@ -222,6 +245,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       equipments,
       technicalCalls,
       checklists,
+      addUnit,
+      updateUnit,
+      deleteUnit,
       addEquipment,
       updateEquipment,
       deleteEquipment,

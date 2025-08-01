@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useNotifications } from '../context/NotificationContext';
+import Logo from './Logo';
 
 interface SidebarProps {
   currentPage: string;
@@ -34,6 +35,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   const menuItems = [
     { id: 'dashboard', name: 'Dashboard Geral', icon: BarChart3 },
+    { id: 'units', name: 'Gerenciar Unidades', icon: Building2 },
     { id: 'equipments', name: 'Unidades e Equipamentos', icon: Building2 },
     { id: 'checklist', name: 'Novo Checklist', icon: ClipboardCheck },
     { id: 'calls', name: 'Chamados Técnicos', icon: Wrench },
@@ -77,7 +79,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         <div className="flex flex-col h-full">
           {/* Header */}
           <div className="flex items-center justify-center h-16 bg-red-600">
-            <h1 className="text-xl font-bold">Gaviões Checklist</h1>
+            <Logo className="h-12 w-auto" />
           </div>
 
           {/* User Info */}
